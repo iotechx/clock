@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zodiac Clock - Ascendant Fixed</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #fcfcfc;
+            color: #2d3436;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        #root {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #dateTimeDisplay {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            font-size: 16px;
+            font-family: monospace;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px;
+            border-radius: 8px;
+            z-index: 100;
+            border: 1px solid #dfe6e9;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .zodiac-symbol {
+            user-select: none;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <div id="dateTimeDisplay">
+        <span id="dateYear" style="cursor: ns-resize;">2026</span>-<span id="dateMonth"
+            style="cursor: ns-resize;">02</span>-<span id="dateDay" style="cursor: ns-resize;">20</span>
+        <span id="timeHours" style="cursor: ns-resize;">00</span>:<span id="timeMinutes"
+            style="cursor: ns-resize;">00</span>:<span id="timeSeconds" style="cursor: ns-resize;">00</span>
+        <span id="resetButton" style="cursor: pointer; margin-left: 10px;">↻</span>
+    </div>
+
+    <script src="astronomy.browser.min.js"></script>
+
+    <script>
+        const elementRoot = document.getElementById("root");
+        let size, scale, orbitRadius;
+        const paddingOrbit = 0.8;
+
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.style.position = 'fixed'; svg.style.left = '50%'; svg.style.top = '50%';
+        svg.style.transform = 'translate(-50%, -50%)';
+
+        const sunDisk = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        sunDisk.setAttribute("style", `fill:#f9ca24; stroke:#f0932b; stroke-width:2`);
+        svg.appendChild(sunDisk);
+
+        const orbit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        orbit.setAttribute("style", `fill:none; stroke:#b2bec3; stroke-width:1; stroke-dasharray: 5 3`);
+        svg.appendChild(orbit);
+
+        const ascLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        ascLine.setAttribute('style', `stroke:#eb4d4b; stroke-width:6; stroke-linecap:round;`);
+        svg.appendChild(ascLine);
+
+        const zodiacSymbols = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+        for (let i = 0; i < 12; i++) {
+            const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            txt.classList.add('zodiac-symbol');
+            txt.setAttribute("text-anchor", "middle");
+            txt.setAttribute("dominant-baseline", "central");
+            txt.setAttribute("fill", "#6c5ce7");
+            txt.textContent = zodiacSymbols[i];
+            svg.appendChild(txt);
+        }
+        elementRoot.appendChild(svg);
+
+        // --- FIXED LOCATION LOGIC ---
+        // Default to if memory is empty to avoid NaN errors
+        // Kozhikode, Kerala, India: lat=11.258121310045759, lon=75.77228348901123
+        let userLat = parseFloat(localStorage.getItem('savedLat')) || 11.258121310045759;
+        let userLon = parseFloat(localStorage.getItem('savedLon')) || 75.77228348901123;
+
+        let currentDate = new Date();
+        let isManualMode = false;
+        let lastRealTime = Date.now();
+
+        function normalize(d) { d %= 360; return d < 0 ? d + 360 : d; }
+
+        function updatePositions() {
+            if (!scale) return;
+            const atime = Astronomy.MakeTime(currentDate);
+            const JD = fnGetJulianDate(currentDate);
+            const T = (JD - 2451545.0) / 36525.0;
+
+            // 1. Sun Position
+            const sunPos = Astronomy.SunPosition(atime);
+            const sunAngle = (sunPos.elon - 90) * Math.PI / 180;
+            sunDisk.setAttribute("cx", scale + orbitRadius * Math.cos(sunAngle));
+            sunDisk.setAttribute("cy", scale + orbitRadius * Math.sin(sunAngle));
+            sunDisk.setAttribute("r", scale / 12);
+
+            // 2. Ascendant (Red Line) - Forced calculation
+            let GMST = 280.46061837 + 360.98564736629 * (JD - 2451545.0) + 0.000387933 * T * T;
+            const LSTrad = normalize(GMST + userLon) * Math.PI / 180.0;
+            const eps = (23.43929 - 0.01300 * T) * Math.PI / 180;
+            const phi = userLat * Math.PI / 180;
+
+            const y = Math.cos(LSTrad);
+            const x = -(Math.sin(LSTrad) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps));
+            const ascLon = normalize(Math.atan2(y, x) * 180.0 / Math.PI);
+
+            const aAngle = (ascLon - 90) * Math.PI / 180;
+            //console.log(`currentDate = ${currentDate.toISOString()}, JD = ${JD}, atime = ${atime}`);
+
+            // Draw relative to scale
+            ascLine.setAttribute('x1', scale + (orbitRadius * 0.7) * Math.cos(aAngle));
+            ascLine.setAttribute('y1', scale + (orbitRadius * 0.7) * Math.sin(aAngle));
+            ascLine.setAttribute('x2', scale + (orbitRadius * 1.2) * Math.cos(aAngle));
+            ascLine.setAttribute('y2', scale + (orbitRadius * 1.2) * Math.sin(aAngle));
+
+            updateUI(currentDate);
+        }
+
+        function updateUI(date) {
+            document.getElementById("dateYear").textContent = date.getFullYear();
+            document.getElementById("dateMonth").textContent = String(date.getMonth() + 1).padStart(2, '0');
+            document.getElementById("dateDay").textContent = String(date.getDate()).padStart(2, '0');
+            document.getElementById("timeHours").textContent = String(date.getHours()).padStart(2, '0');
+            document.getElementById("timeMinutes").textContent = String(date.getMinutes()).padStart(2, '0');
+            document.getElementById("timeSeconds").textContent = String(date.getSeconds()).padStart(2, '0');
+        }
+
+        function tick() {
+            if (!isManualMode) {
+                const now = Date.now();
+                currentDate = new Date(currentDate.getTime() + (now - lastRealTime));
+                lastRealTime = now;
+            }
+            updatePositions();
+            requestAnimationFrame(tick);
+        }
+
+        function onResize() {
+            size = Math.min(window.innerWidth, window.innerHeight) - 50;
+            scale = size / 2;
+            orbitRadius = scale * paddingOrbit;
+            svg.setAttribute("width", size); svg.setAttribute("height", size);
+            orbit.setAttribute("cx", scale); orbit.setAttribute("cy", scale); orbit.setAttribute("r", orbitRadius);
+
+            const symbols = svg.querySelectorAll('.zodiac-symbol');
+            symbols.forEach((s, i) => {
+                const ang = (i * 30 - 90) * Math.PI / 180;
+                s.setAttribute("x", scale + orbitRadius * Math.cos(ang));
+                s.setAttribute("y", scale + orbitRadius * Math.sin(ang));
+                s.setAttribute("font-size", scale / 10);
+            });
+            updatePositions();
+        }
+
+        window.addEventListener('resize', onResize);
+
+        const parts = [
+            { id: "dateYear", add: (d, v) => d.setFullYear(d.getFullYear() + v) },
+            { id: "dateMonth", add: (d, v) => d.setMonth(d.getMonth() + v) },
+            { id: "dateDay", add: (d, v) => d.setDate(d.getDate() + v) },
+            { id: "timeHours", add: (d, v) => d.setHours(d.getHours() + v) },
+            { id: "timeMinutes", add: (d, v) => d.setMinutes(d.getMinutes() + v) },
+            { id: "timeSeconds", add: (d, v) => d.setSeconds(d.getSeconds() + v) }
+        ];
+
+        parts.forEach(p => {
+            document.getElementById(p.id).onwheel = (e) => {
+                e.preventDefault();
+                isManualMode = true;
+                p.add(currentDate, e.deltaY > 0 ? -1 : 1);
+                updatePositions();
+                clearTimeout(window.resumeT);
+                window.resumeT = setTimeout(() => { isManualMode = false; lastRealTime = Date.now(); }, 2000);
+            };
+        });
+
+        document.getElementById("resetButton").onclick = () => { currentDate = new Date(); updatePositions(); };
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(p => {
+                userLat = p.coords.latitude; userLon = p.coords.longitude;
+                console.log(`Got user location: lat=${userLat}, lon=${userLon}`);
+                localStorage.setItem('savedLat', userLat);
+                localStorage.setItem('savedLon', userLon);
+                updatePositions();
+            });
+        }
+
+        onResize();
+        tick();
+
+        function fnGetJulianDate(date) {
+            let year = date.getUTCFullYear();
+            let month = date.getUTCMonth() + 1; // JS months are 0-11
+            let day = date.getUTCDate();
+            let hours = date.getUTCHours();
+            let minutes = date.getUTCMinutes();
+            let seconds = date.getUTCSeconds();
+
+            // If month is Jan or Feb, treat as month 13 or 14 of previous year
+            if (month <= 2) {
+                year -= 1;
+                month += 12;
+            }
+
+            const A = Math.floor(year / 100);
+            const B = 2 - A + Math.floor(A / 4);
+
+            // Calculate JD at 0h UT
+            const jdDay = Math.floor(365.25 * (year + 4716)) +
+                Math.floor(30.6001 * (month + 1)) +
+                day + B - 1524.5;
+
+            // Add the time fraction
+            const jdTime = (hours / 24) + (minutes / 1440) + (seconds / 86400);
+
+            return jdDay + jdTime;
+        }
+    </script>
+</body>
+
+</html>
