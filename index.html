@@ -56,7 +56,7 @@
         <span id="resetButton" style="cursor: pointer; margin-left: 10px;">↻</span>
     </div>
 
-    <script src="astronomy.browser.min.js"></script>
+    <script src="astronomy.browser.js"></script>
 
     <script>
         const elementRoot = document.getElementById("root");
@@ -67,9 +67,15 @@
         svg.style.position = 'fixed'; svg.style.left = '50%'; svg.style.top = '50%';
         svg.style.transform = 'translate(-50%, -50%)';
 
+        // --- SUN ELEMENT ---
         const sunDisk = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         sunDisk.setAttribute("style", `fill:#f9ca24; stroke:#f0932b; stroke-width:2`);
         svg.appendChild(sunDisk);
+
+        // --- MOON ELEMENT ---
+        const moonDisk = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        moonDisk.setAttribute("style", `fill:#dfe6e9; stroke:#636e72; stroke-width:1`);
+        svg.appendChild(moonDisk);
 
         const orbit = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         orbit.setAttribute("style", `fill:none; stroke:#b2bec3; stroke-width:1; stroke-dasharray: 5 3`);
@@ -91,9 +97,6 @@
         }
         elementRoot.appendChild(svg);
 
-        // --- FIXED LOCATION LOGIC ---
-        // Default to if memory is empty to avoid NaN errors
-        // Kozhikode, Kerala, India: lat=11.258121310045759, lon=75.77228348901123
         let userLat = parseFloat(localStorage.getItem('savedLat')) || 11.258121310045759;
         let userLon = parseFloat(localStorage.getItem('savedLon')) || 75.77228348901123;
 
@@ -116,7 +119,14 @@
             sunDisk.setAttribute("cy", scale + orbitRadius * Math.sin(sunAngle));
             sunDisk.setAttribute("r", scale / 12);
 
-            // 2. Ascendant (Red Line) - Forced calculation
+            // 2. Moon Position
+            const moonPos = Astronomy.EclipticGeoMoon(atime);
+            const moonAngle = (moonPos.lon - 90) * Math.PI / 180;
+            moonDisk.setAttribute("cx", scale + (orbitRadius * 0.85) * Math.cos(moonAngle)); // Slightly inner orbit
+            moonDisk.setAttribute("cy", scale + (orbitRadius * 0.85) * Math.sin(moonAngle));
+            moonDisk.setAttribute("r", scale / 18);
+
+            // 3. Ascendant
             let GMST = 280.46061837 + 360.98564736629 * (JD - 2451545.0) + 0.000387933 * T * T;
             const LSTrad = normalize(GMST + userLon) * Math.PI / 180.0;
             const eps = (23.43929 - 0.01300 * T) * Math.PI / 180;
@@ -127,9 +137,7 @@
             const ascLon = normalize(Math.atan2(y, x) * 180.0 / Math.PI);
 
             const aAngle = (ascLon - 90) * Math.PI / 180;
-            //console.log(`currentDate = ${currentDate.toISOString()}, JD = ${JD}, atime = ${atime}`);
 
-            // Draw relative to scale
             ascLine.setAttribute('x1', scale + (orbitRadius * 0.7) * Math.cos(aAngle));
             ascLine.setAttribute('y1', scale + (orbitRadius * 0.7) * Math.sin(aAngle));
             ascLine.setAttribute('x2', scale + (orbitRadius * 1.2) * Math.cos(aAngle));
@@ -201,7 +209,6 @@
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(p => {
                 userLat = p.coords.latitude; userLon = p.coords.longitude;
-                console.log(`Got user location: lat=${userLat}, lon=${userLon}`);
                 localStorage.setItem('savedLat', userLat);
                 localStorage.setItem('savedLon', userLon);
                 updatePositions();
@@ -213,29 +220,16 @@
 
         function fnGetJulianDate(date) {
             let year = date.getUTCFullYear();
-            let month = date.getUTCMonth() + 1; // JS months are 0-11
+            let month = date.getUTCMonth() + 1;
             let day = date.getUTCDate();
             let hours = date.getUTCHours();
             let minutes = date.getUTCMinutes();
             let seconds = date.getUTCSeconds();
-
-            // If month is Jan or Feb, treat as month 13 or 14 of previous year
-            if (month <= 2) {
-                year -= 1;
-                month += 12;
-            }
-
+            if (month <= 2) { year -= 1; month += 12; }
             const A = Math.floor(year / 100);
             const B = 2 - A + Math.floor(A / 4);
-
-            // Calculate JD at 0h UT
-            const jdDay = Math.floor(365.25 * (year + 4716)) +
-                Math.floor(30.6001 * (month + 1)) +
-                day + B - 1524.5;
-
-            // Add the time fraction
+            const jdDay = Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + day + B - 1524.5;
             const jdTime = (hours / 24) + (minutes / 1440) + (seconds / 86400);
-
             return jdDay + jdTime;
         }
     </script>
