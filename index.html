@@ -137,11 +137,13 @@
             const ascLon = normalize(Math.atan2(y, x) * 180.0 / Math.PI);
 
             const aAngle = (ascLon - 90) * Math.PI / 180;
-
-            ascLine.setAttribute('x1', scale + (orbitRadius * 0.7) * Math.cos(aAngle));
-            ascLine.setAttribute('y1', scale + (orbitRadius * 0.7) * Math.sin(aAngle));
-            ascLine.setAttribute('x2', scale + (orbitRadius * 1.2) * Math.cos(aAngle));
-            ascLine.setAttribute('y2', scale + (orbitRadius * 1.2) * Math.sin(aAngle));
+            const ascLineLength = 0.3;
+            const ascLineStart = 1 - ascLineLength / 2; // Start a bit inside the orbit
+            const ascLineEnd = 1 + ascLineLength / 2; // End a bit outside the orbit
+            ascLine.setAttribute('x1', scale + (orbitRadius * ascLineStart) * Math.cos(aAngle));
+            ascLine.setAttribute('y1', scale + (orbitRadius * ascLineStart) * Math.sin(aAngle));
+            ascLine.setAttribute('x2', scale + (orbitRadius * ascLineEnd) * Math.cos(aAngle));
+            ascLine.setAttribute('y2', scale + (orbitRadius * ascLineEnd) * Math.sin(aAngle));
 
             updateUI(currentDate);
         }
@@ -199,8 +201,7 @@
                 isManualMode = true;
                 p.add(currentDate, e.deltaY > 0 ? -1 : 1);
                 updatePositions();
-                clearTimeout(window.resumeT);
-                window.resumeT = setTimeout(() => { isManualMode = false; lastRealTime = Date.now(); }, 2000);
+                isManualMode = false;
             };
         });
 
