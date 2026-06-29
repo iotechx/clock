@@ -1,0 +1,51 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #fcfcfc;
+    color: #2d3436;
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+#root {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#dateTimeDisplay {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    font-size: 16px;
+    font-family: monospace;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px;
+    border-radius: 8px;
+    z-index: 100;
+    border: 1px solid #dfe6e9;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.ephemeris-text {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #636e72;
+    white-space: nowrap;
+}
+
+.date-part {
+    cursor: ns-resize;
+}
+
+#resetButton {
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.zodiac-symbol {
+    user-select: none;
+    pointer-events: none;
+}
