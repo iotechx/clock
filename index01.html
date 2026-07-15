@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <div id="dateTimeDisplay">
+        <div>
+            <span id="dateYear" class="date-part">2026</span>-<span id="dateMonth" class="date-part">02</span>-<span id="dateDay" class="date-part">20</span>
+            <span id="timeHours" class="date-part">00</span>:<span id="timeMinutes" class="date-part">00</span>:<span id="timeSeconds" class="date-part">00</span>
+            <span id="resetButton">↻</span>
+        </div>
+        <div id="ephemerisText" class="ephemeris-text">☉ — · ☽ — </div>
+    </div>
+
+    <script src="astronomy.browser.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
