@@ -49,3 +49,9 @@ body {
     user-select: none;
     pointer-events: none;
 }
+
+.nakshathra-names {
+    user-select: none;
+    pointer-events: none;
+    font-size: 10px;
+}
