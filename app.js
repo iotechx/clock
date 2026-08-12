@@ -3,6 +3,7 @@ let size;
 let scale;
 let orbitRadius;
 const paddingOrbit = 0.8;
+const ayanamsa = 24 + 16/60;
 
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.style.position = 'fixed';
@@ -97,11 +98,14 @@ function getEphemerisState(date) {
 
     const y = Math.cos(lstRad);
     const x = -(Math.sin(lstRad) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps));
-    const ascLon = normalize(Math.atan2(y, x) * 180.0 / Math.PI);
+    const ascLon = normalize((Math.atan2(y, x) * 180.0 / Math.PI - ayanamsa));
 
+    sunLonAyanamsamAdjusted = sunPos.elon - ayanamsa;
+    moonLonAyanamsamAdjusted = moonPos.lon - ayanamsa;
+    
     return {
-        sunLon: sunPos.elon,
-        moonLon: moonPos.lon,
+        sunLon: sunLonAyanamsamAdjusted,
+        moonLon: moonLonAyanamsamAdjusted,
         ascLon
     };
 }
@@ -197,7 +201,7 @@ function updatePositions() {
     }
 
     const ephemeris = getEphemerisState(currentDate);
-    const sunAngle = (ephemeris.sunLon - 90) * Math.PI / 180;
+    const sunAngle = ((ephemeris.sunLon - 90) * Math.PI / 180);
     sunDisk.setAttribute('cx', scale + orbitRadius * Math.cos(sunAngle));
     sunDisk.setAttribute('cy', scale + orbitRadius * Math.sin(sunAngle));
     sunDisk.setAttribute('r', scale / 12);
