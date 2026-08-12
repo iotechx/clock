@@ -55,6 +55,7 @@ ascLine.setAttribute('style', 'stroke:#eb4d4b; stroke-width:6; stroke-linecap:ro
 svg.appendChild(ascLine);
 
 const zodiacSymbols = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
+
 for (let i = 0; i < zodiacSymbols.length; i += 1) {
     const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     txt.classList.add('zodiac-symbol');
@@ -62,6 +63,17 @@ for (let i = 0; i < zodiacSymbols.length; i += 1) {
     txt.setAttribute('dominant-baseline', 'central');
     txt.setAttribute('fill', '#6c5ce7');
     txt.textContent = zodiacSymbols[i];
+    svg.appendChild(txt);
+}
+
+const nakshatraNames = ['അശ്വതി', 'ഭരണി', 'കാർത്തിക', 'രോഹിണി', 'മകയിരം', 'തിരുവാതിര', 'പുണർഥം', 'പൂയം', 'ആയില്ല്യം', 'മകം', 'പൂരം', 'ഉത്രം', 'അത്തം', 'ചിത്തിര', 'ചോതി', 'വിശാഖം', 'അനിഴം', 'തൃക്കേട്ട', 'മൂലം', 'പൂരാടം', 'ഉത്രാടം', 'തിരുവോണം', 'അവിട്ടം', 'ചതയം', 'പൂരുരുട്ടാതി', 'ഉതൃട്ടാതി', 'രേവതി'];
+for (let i = 0; i < nakshatraNames.length; i += 1) {
+    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    txt.classList.add('nakshathra-names');
+    txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('dominant-baseline', 'central');
+    txt.setAttribute('fill', '#6c5ce7');
+    txt.textContent = nakshatraNames[i];
     svg.appendChild(txt);
 }
 elementRoot.appendChild(svg);
@@ -254,7 +266,7 @@ function formatLongitude(longitude) {
     const normalized = normalize(longitude);
     const degrees = Math.floor(normalized);
     const minutes = Math.floor((normalized - degrees) * 60);
-    const sign = ['♈ Aries', '♉ Taurus', '♊ Gemini', '♋ Cancer', '♌ Leo', '♍ Virgo', '♎ Libra', '♏ Scorpio', '♐ Sagittarius', '♑ Capricorn', '♒ Aquarius', '♓ Pisces'][Math.floor(normalized / 30) % 12];
+    const sign = ['♈ Aries മേടം', '♉ Taurus ഇടവം', '♊ Gemini മിഥുനം', '♋ Cancer കർക്കിടകം', '♌ Leo ചിങ്ങം', '♍ Virgo കന്നി', '♎ Libra തുലാം', '♏ Scorpio വൃശ്ചികം', '♐ Sagittarius ധനു', '♑ Capricorn മകരം', '♒ Aquarius കുംഭം', '♓ Pisces മീനം'][Math.floor(normalized / 30) % 12];
     return `${degrees}° ${String(minutes).padStart(2, '0')}′ ${sign}`;
 }
 
@@ -307,7 +319,7 @@ function onResize() {
 
     nakshatraBoundaryLines.forEach((line, index) => {
         const angle = (index * 360 / 27 - 90) * Math.PI / 180;
-        const innerRadius = nakshatraRadius * 0.8;
+        const innerRadius = nakshatraRadius * 0.9;
         const outerRadius = nakshatraRadius;
         line.setAttribute('x1', scale + innerRadius * Math.cos(angle));
         line.setAttribute('y1', scale + innerRadius * Math.sin(angle));
@@ -328,6 +340,14 @@ function onResize() {
         symbol.setAttribute('x', scale + orbitRadius * Math.cos(angle));
         symbol.setAttribute('y', scale + orbitRadius * Math.sin(angle));
         symbol.setAttribute('font-size', scale / 10);
+    });
+
+    const nakshatraMarkerNames = svg.querySelectorAll('.nakshathra-names');
+    nakshatraMarkerNames.forEach((nakshatraMarkerName, index) => {
+        const angle = (index * (13 + 20/60) - 90) * Math.PI / 180;
+        nakshatraMarkerName.setAttribute('x', scale + nakshatraRadius*0.8 * Math.cos(angle));
+        nakshatraMarkerName.setAttribute('y', scale + nakshatraRadius*0.8 * Math.sin(angle));
+        nakshatraMarkerName.setAttribute('font-size', scale / 10);
     });
     updatePositions();
 }
