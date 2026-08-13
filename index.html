@@ -22,27 +22,34 @@
       padding: 0;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Malayalam MN", "Kartika", sans-serif;
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
       background-color: var(--bg-color);
       background-image: 
         radial-gradient(circle at 50% 20%, rgba(30, 40, 85, 0.5) 0%, transparent 60%),
         radial-gradient(circle at 80% 80%, rgba(20, 15, 40, 0.5) 0%, transparent 50%);
       color: var(--text-main);
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Malayalam MN", "Kartika", sans-serif;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 20px;
+      padding: 1vh 1vw;
+      justify-content: space-between;
     }
 
     header {
       text-align: center;
-      margin-bottom: 20px;
+      flex-shrink: 0;
     }
 
     header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       letter-spacing: 2px;
       text-transform: uppercase;
       color: #fff;
@@ -50,24 +57,26 @@
     }
 
     header p {
-      font-size: 0.9rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
-      margin-top: 5px;
+      margin-top: 2px;
     }
 
     .main-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 25px;
+      justify-content: center;
+      gap: 20px;
       width: 100%;
-      max-width: 1200px;
+      flex: 1;
+      min-height: 0;
     }
 
     @media (min-width: 900px) {
       .main-container {
         flex-direction: row;
-        align-items: flex-start;
+        align-items: center;
         justify-content: center;
       }
     }
@@ -75,10 +84,13 @@
     /* SVG Clock Styling */
     .clock-wrapper {
       position: relative;
-      width: 100%;
-      max-width: 650px;
+      height: 100%;
+      max-height: 75vh;
       aspect-ratio: 1 / 1;
       filter: drop-shadow(0 15px 35px rgba(0,0,0,0.6));
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     svg {
@@ -89,37 +101,37 @@
 
     /* Panels & Readouts */
     .dashboard {
-      flex: 1;
       width: 100%;
-      max-width: 480px;
+      max-width: 440px;
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
+      flex-shrink: 0;
     }
 
     .card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       backdrop-filter: blur(12px);
-      border-radius: 16px;
-      padding: 18px;
+      border-radius: 14px;
+      padding: 14px;
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
 
     .card h2 {
-      font-size: 1rem;
+      font-size: 0.9rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: var(--text-muted);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 6px;
+      padding-bottom: 4px;
     }
 
     .readout-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
     }
 
     .readout-item {
@@ -128,13 +140,13 @@
     }
 
     .readout-item .label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
       text-transform: uppercase;
     }
 
     .readout-item .value {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 600;
       margin-top: 2px;
       font-variant-numeric: tabular-nums;
@@ -148,7 +160,7 @@
     .location-controls {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
@@ -156,21 +168,21 @@
       background: rgba(0, 0, 0, 0.3);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 6px 10px;
-      border-radius: 8px;
-      width: 90px;
-      font-size: 0.85rem;
+      padding: 5px 8px;
+      border-radius: 6px;
+      width: 80px;
+      font-size: 0.8rem;
     }
 
     .btn {
       background: linear-gradient(135deg, #2b32b2, #1488cc);
       border: none;
       color: white;
-      padding: 8px 14px;
-      border-radius: 8px;
+      padding: 6px 12px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: 500;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       transition: all 0.2s ease;
     }
 
@@ -183,15 +195,15 @@
     .datetime-scroller-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 6px;
+      gap: 5px;
       text-align: center;
     }
 
     .dt-box {
       background: rgba(0, 0, 0, 0.4);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 8px 2px;
+      border-radius: 6px;
+      padding: 6px 2px;
       cursor: ns-resize;
       user-select: none;
       transition: border-color 0.2s;
@@ -202,14 +214,14 @@
     }
 
     .dt-box .dt-label {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       color: var(--text-muted);
       text-transform: uppercase;
       display: block;
     }
 
     .dt-box .dt-val {
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 700;
       color: #fff;
       display: block;
@@ -221,7 +233,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 12px;
+      margin-top: 8px;
     }
 
     /* Elements Zodiac Ring Colors */
@@ -241,135 +253,137 @@
 </head>
 <body>
 
-  <header>
-    <h1>Sidereal Astroclock</h1>
-    <p>Real-Time Lahiri Zodiac • Kerala Edition</p>
-  </header>
+  <div class="app-wrapper">
+    <header>
+      <h1>Sidereal Astroclock</h1>
+      <p>Real-Time Lahiri Zodiac • Kerala Edition</p>
+    </header>
 
-  <div class="main-container">
-    
-    <!-- SVG Circular Astroclock -->
-    <div class="clock-wrapper">
-      <svg id="astroclock" viewBox="0 0 800 800">
-        <defs>
-          <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#181c38" />
-            <stop offset="100%" stop-color="#0b0d17" />
-          </radialGradient>
-        </defs>
-
-        <!-- Outer Background Circle -->
-        <circle cx="400" cy="400" r="395" fill="url(#centerGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
-
-        <!-- Rings Generated via JS -->
-        <g id="month-ring"></g>
-        <g id="zodiac-ring"></g>
-        <g id="nakshatra-ring"></g>
-        <g id="degree-ticks" stroke="rgba(255,255,255,0.2)" stroke-width="1"></g>
-
-        <!-- Inner Wheel Divider -->
-        <circle cx="400" cy="400" r="230" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" />
-        <circle cx="400" cy="400" r="160" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
-
-        <!-- Center Hub -->
-        <circle cx="400" cy="400" r="8" fill="#e2e8f0" />
-
-        <!-- Dynamic Celestial Hands -->
-        <g id="hand-asc" class="glow-asc">
-          <line x1="400" y1="400" x2="400" y2="40" stroke="#ff4757" stroke-width="2.5" stroke-dasharray="6,4" />
-          <polygon points="400,25 393,42 407,42" fill="#ff4757" />
-          <text x="400" y="15" fill="#ff4757" font-size="14" font-weight="bold" text-anchor="middle">ASC</text>
-        </g>
-
-        <g id="hand-sun" class="glow-sun">
-          <line x1="400" y1="400" x2="400" y2="100" stroke="#f3ba2f" stroke-width="3" />
-          <circle cx="400" cy="90" r="14" fill="#f3ba2f" />
-          <circle cx="400" cy="90" r="6" fill="#0b0d17" />
-        </g>
-
-        <g id="hand-moon" class="glow-moon">
-          <line x1="400" y1="400" x2="400" y2="130" stroke="#00f0ff" stroke-width="2.5" />
-          <path d="M 393,115 A 12,12 0 1,0 407,130 A 9,9 0 1,1 393,115 Z" fill="#00f0ff" />
-        </g>
-
-      </svg>
-    </div>
-
-    <!-- Right Side Dashboard -->
-    <div class="dashboard">
+    <div class="main-container">
       
-      <!-- Real-Time Positions -->
-      <div class="card">
-        <h2>Live Positions (Sidereal)</h2>
-        <div class="readout-grid">
-          <div class="readout-item">
-            <span class="label">Sun ☉</span>
-            <span class="value val-sun" id="sun-pos">--</span>
-            <span class="label" id="sun-nak" class="ml-text">--</span>
-          </div>
-          <div class="readout-item">
-            <span class="label">Moon ☽</span>
-            <span class="value val-moon" id="moon-pos">--</span>
-            <span class="label" id="moon-nak" class="ml-text">--</span>
-          </div>
-          <div class="readout-item">
-            <span class="label">Ascendant (ASC)</span>
-            <span class="value val-asc" id="asc-pos">--</span>
-            <span class="label" id="asc-nak" class="ml-text">--</span>
-          </div>
-        </div>
+      <!-- SVG Circular Astroclock -->
+      <div class="clock-wrapper">
+        <svg id="astroclock" viewBox="0 0 800 800">
+          <defs>
+            <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#181c38" />
+              <stop offset="100%" stop-color="#0b0d17" />
+            </radialGradient>
+          </defs>
+
+          <!-- Outer Background Circle -->
+          <circle cx="400" cy="400" r="395" fill="url(#centerGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
+
+          <!-- Rings Generated via JS -->
+          <g id="month-ring"></g>
+          <g id="zodiac-ring"></g>
+          <g id="nakshatra-ring"></g>
+          <g id="degree-ticks" stroke="rgba(255,255,255,0.2)" stroke-width="1"></g>
+
+          <!-- Inner Wheel Divider -->
+          <circle cx="400" cy="400" r="230" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" />
+          <circle cx="400" cy="400" r="160" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+
+          <!-- Center Hub -->
+          <circle cx="400" cy="400" r="8" fill="#e2e8f0" />
+
+          <!-- Dynamic Celestial Hands -->
+          <g id="hand-asc" class="glow-asc">
+            <line x1="400" y1="400" x2="400" y2="40" stroke="#ff4757" stroke-width="2.5" stroke-dasharray="6,4" />
+            <polygon points="400,25 393,42 407,42" fill="#ff4757" />
+            <text x="400" y="15" fill="#ff4757" font-size="14" font-weight="bold" text-anchor="middle">ASC</text>
+          </g>
+
+          <g id="hand-sun" class="glow-sun">
+            <line x1="400" y1="400" x2="400" y2="100" stroke="#f3ba2f" stroke-width="3" />
+            <circle cx="400" cy="90" r="14" fill="#f3ba2f" />
+            <circle cx="400" cy="90" r="6" fill="#0b0d17" />
+          </g>
+
+          <g id="hand-moon" class="glow-moon">
+            <line x1="400" y1="400" x2="400" y2="130" stroke="#00f0ff" stroke-width="2.5" />
+            <path d="M 393,115 A 12,12 0 1,0 407,130 A 9,9 0 1,1 393,115 Z" fill="#00f0ff" />
+          </g>
+
+        </svg>
       </div>
 
-      <!-- Interactive Date & Time Scroller / Controls -->
-      <div class="card">
-        <h2>Interactive Date & Time</h2>
-        <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">Scroll up/down on any box to adjust values & animate celestial hands:</p>
+      <!-- Right Side Dashboard -->
+      <div class="dashboard">
         
-        <div class="datetime-scroller-grid">
-          <div class="dt-box" data-unit="year">
-            <span class="dt-label">Year</span>
-            <span class="dt-val" id="val-year">2026</span>
-          </div>
-          <div class="dt-box" data-unit="month">
-            <span class="dt-label">Month</span>
-            <span class="dt-val" id="val-month">08</span>
-          </div>
-          <div class="dt-box" data-unit="day">
-            <span class="dt-label">Day</span>
-            <span class="dt-val" id="val-day">13</span>
-          </div>
-          <div class="dt-box" data-unit="hour">
-            <span class="dt-label">Hour</span>
-            <span class="dt-val" id="val-hour">10</span>
-          </div>
-          <div class="dt-box" data-unit="minute">
-            <span class="dt-label">Minute</span>
-            <span class="dt-val" id="val-minute">19</span>
-          </div>
-          <div class="dt-box" data-unit="second">
-            <span class="dt-label">Second</span>
-            <span class="dt-val" id="val-second">14</span>
+        <!-- Real-Time Positions -->
+        <div class="card">
+          <h2>Live Positions (Sidereal)</h2>
+          <div class="readout-grid">
+            <div class="readout-item">
+              <span class="label">Sun ☉</span>
+              <span class="value val-sun" id="sun-pos">--</span>
+              <span class="label" id="sun-nak" class="ml-text">--</span>
+            </div>
+            <div class="readout-item">
+              <span class="label">Moon ☽</span>
+              <span class="value val-moon" id="moon-pos">--</span>
+              <span class="label" id="moon-nak" class="ml-text">--</span>
+            </div>
+            <div class="readout-item">
+              <span class="label">Ascendant (ASC)</span>
+              <span class="value val-asc" id="asc-pos">--</span>
+              <span class="label" id="asc-nak" class="ml-text">--</span>
+            </div>
           </div>
         </div>
 
-        <div class="control-actions">
-          <button class="btn" id="btn-live">Resume Real-Time</button>
-          <span class="label" id="ayanamsha-val" style="font-size: 0.85rem;">--</span>
+        <!-- Interactive Date & Time Scroller / Controls -->
+        <div class="card">
+          <h2>Interactive Date & Time</h2>
+          <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px;">Scroll up/down on any box to adjust values & animate celestial hands:</p>
+          
+          <div class="datetime-scroller-grid">
+            <div class="dt-box" data-unit="year">
+              <span class="dt-label">Year</span>
+              <span class="dt-val" id="val-year">2026</span>
+            </div>
+            <div class="dt-box" data-unit="month">
+              <span class="dt-label">Month</span>
+              <span class="dt-val" id="val-month">08</span>
+            </div>
+            <div class="dt-box" data-unit="day">
+              <span class="dt-label">Day</span>
+              <span class="dt-val" id="val-day">13</span>
+            </div>
+            <div class="dt-box" data-unit="hour">
+              <span class="dt-label">Hour</span>
+              <span class="dt-val" id="val-hour">10</span>
+            </div>
+            <div class="dt-box" data-unit="minute">
+              <span class="dt-label">Minute</span>
+              <span class="dt-val" id="val-minute">35</span>
+            </div>
+            <div class="dt-box" data-unit="second">
+              <span class="dt-label">Second</span>
+              <span class="dt-val" id="val-second">07</span>
+            </div>
+          </div>
+
+          <div class="control-actions">
+            <button class="btn" id="btn-live">Resume Real-Time</button>
+            <span class="label" id="ayanamsha-val" style="font-size: 0.75rem;">--</span>
+          </div>
         </div>
+
+        <!-- Location & Settings -->
+        <div class="card">
+          <h2>Observer Controls</h2>
+          <div class="location-controls">
+            <label class="label">Lat:</label>
+            <input type="number" id="lat" value="11.25" step="0.01" />
+            <label class="label">Lon:</label>
+            <input type="number" id="lon" value="75.78" step="0.01" />
+            <button class="btn" id="btn-geolocate">Detect Location</button>
+          </div>
+        </div>
+
       </div>
-
-      <!-- Location & Settings -->
-      <div class="card">
-        <h2>Observer Controls</h2>
-        <div class="location-controls">
-          <label class="label">Lat:</label>
-          <input type="number" id="lat" value="11.25" step="0.01" />
-          <label class="label">Lon:</label>
-          <input type="number" id="lon" value="75.78" step="0.01" />
-          <button class="btn" id="btn-geolocate">Detect Location</button>
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -675,11 +689,11 @@
       const ascInfo = formatSiderealPos(ascSid);
 
       document.getElementById("sun-pos").textContent = sunInfo.formatted;
-      document.getElementById("sun-nak").textContent = `${sunInfo.nakshatra}`;
+      document.getElementById("sun-nak").textContent = `നാൾ: ${sunInfo.nakshatra}`;
       document.getElementById("moon-pos").textContent = moonInfo.formatted;
-      document.getElementById("moon-nak").textContent = `${moonInfo.nakshatra}`;
+      document.getElementById("moon-nak").textContent = `നാൾ: ${moonInfo.nakshatra}`;
       document.getElementById("asc-pos").textContent = ascInfo.formatted;
-      document.getElementById("asc-nak").textContent = `${ascInfo.nakshatra}`;
+      document.getElementById("asc-nak").textContent = `നാൾ: ${ascInfo.nakshatra}`;
 
       document.getElementById("ayanamsha-val").textContent = `Ayanamsha: ${ayanamsha.toFixed(4)}°`;
       updateDisplayValues(date);
