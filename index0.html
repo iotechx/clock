@@ -1,94 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Sidereal Positions, Rashi & Nakshatra</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        table { border-collapse: collapse; width: 600px; margin-top: 20px; }
-        th, td { border: 1px solid #444; padding: 8px; text-align: center; }
-        .ascendant { font-weight: bold; color: darkblue; background-color: #f0f0f0; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    <h1>Sidereal Positions</h1>
-    <button onclick="calculate()">Update Positions</button>
-    <table>
-        <thead>
-            <tr>
-                <th>Object</th>
-                <th>Longitude</th>
-                <th>Rashi</th>
-                <th>Nakshatra</th>
-            </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-    </table>
 
-    <script>
-        const J2000 = 2451545.0;
-        const KOZHIKODE_LONG = 75.7833;
-        const OBLIQUITY = 23.439;
+    <div id="root"></div>
 
-        const RASHIS = [
-            "മേടം", "ഇടവം", "മിഥുനം", "കർക്കിടകം", "ചിങ്ങം", "കന്നി", 
-            "തുലാം", "വൃശ്ചികം", "ധനു", "മകരം", "കുംഭം", "മീനം"
-        ];
+    <div id="dateTimeDisplay">
+        <div>
+            <span id="dateYear" class="date-part">2026</span>-<span id="dateMonth" class="date-part">02</span>-<span id="dateDay" class="date-part">20</span>
+            <span id="timeHours" class="date-part">00</span>:<span id="timeMinutes" class="date-part">00</span>:<span id="timeSeconds" class="date-part">00</span>
+            <span id="resetButton">↻</span>
+        </div>
+        <div id="ephemerisText" class="ephemeris-text">☉ — · ☽ — </div>
+    </div>
 
-        const NAKSHATRAS = [
-            "അശ്വതി", "ഭരണി", "കാർത്തിക", "രോഹിണി", "മൃഗശീർഷ (മകീര്യം)", "അർദ്ര (തിരുവാതിര)", 
-            "പുനർവസു (പുണർദ്ധം)", "പൂയം", "ആയില്ല്യം", "മകം", "പൂർവ ഫല്ഗുണി (പൂരം)", "ഉത്തര ഫല്ഗുണി (ഉത്രം", 
-            "ഹസ്തം (അത്തം)", "ചിത്തിര", "ചോതി (സ്വാതി)", "വിശാഖം", "അനിഴം", "ജ്യേഷ്ട്", 
-            "മൂലം", "പൂർവ അഷാഡം", "ഉത്തര അഷാഡം", "തിരുവോണം", "അവിട്ടം", "ശതഭിഷ",
-            "പൂർവ ഭദ്രപാദം", "ഉത്തര ഭദ്രപാദം", "രേവതി"
-        ];
-
-        const elements = {
-            'Sun': { L: 280.466, n: 0.98564735 },
-            'Moon': { L: 218.316, n: 13.17639643 },
-            'Mercury': { L: 252.250, n: 4.09233443 },
-            'Venus': { L: 181.979, n: 1.60213024 },
-            'Mars': { L: 355.453, n: 0.52403297 },
-            'Jupiter': { L: 34.404, n: 0.08308530 },
-            'Saturn': { L: 49.944, n: 0.03345965 }
-        };
-
-        function getJulianDate(date) {
-            return (date.getTime() / 86400000) + 2440587.5;
-        }
-
-        function calculate() {
-            const tbody = document.getElementById('tbody');
-            tbody.innerHTML = '';
-            
-            const now = new Date();
-            const d = getJulianDate(now) - J2000;
-            const ayanamsha = 23.8521 + (0.01396 * (d / 365.25));
-
-            const getRashi = (deg) => RASHIS[Math.floor(deg / 30)];
-            const getNakshatra = (deg) => NAKSHATRAS[Math.floor(deg / 13.3333)];
-
-            // 1. Planets
-            for (const [name, el] of Object.entries(elements)) {
-                let lon = (el.L + (el.n * d)) % 360;
-                let sidereal = (lon - ayanamsha + 360) % 360;
-                tbody.innerHTML += `<tr><td>${name}</td><td>${sidereal.toFixed(2)}°</td><td>${getRashi(sidereal)}</td><td>${getNakshatra(sidereal)}</td></tr>`;
-            }
-
-            // 2. Ascendant (Lagna)
-            const ut = now.getUTCHours() + (now.getUTCMinutes() / 60);
-            const gmst = (100.46 + 0.985647 * d + 15 * ut) % 360;
-            const lst = (gmst + KOZHIKODE_LONG) % 360;
-            const rad = Math.PI / 180;
-            const y = Math.sin(lst * rad);
-            const x = Math.cos(lst * rad) * Math.cos(OBLIQUITY * rad);
-            let asc = Math.atan2(y, x) / rad;
-            const ascendant = (asc - ayanamsha + 360) % 360;
-
-            tbody.innerHTML += `<tr class="ascendant"><td>Ascendant</td><td>${ascendant.toFixed(2)}°</td><td>${getRashi(ascendant)}</td><td>${getNakshatra(ascendant)}</td></tr>`;
-        }
-
-        calculate();
-    </script>
+    <script src="astronomy.browser.js"></script>
+    <script src="app.js"></script>
 </body>
+
 </html>
