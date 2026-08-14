@@ -356,35 +356,6 @@
       return (getSunTropicalPosition(jd) - ayanamsha + 360) % 360;
     }
 
-    function getSunriseHour(jd, lat, lon) {
-      const d = jd - 2451545.0;
-      const sunTrop = getSunTropicalPosition(jd);
-      const eps = (23.439291 - 0.0000004 * d) * Math.PI / 180;
-      const radSun = sunTrop * Math.PI / 180;
-      
-      const sinDelta = Math.sin(eps) * Math.sin(radSun);
-      const delta = Math.asin(sinDelta);
-      
-      const radLat = lat * Math.PI / 180;
-      const cosOmega0 = -Math.tan(radLat) * Math.tan(delta);
-      
-      let omega0 = 90;
-      if (cosOmega0 >= 1) omega0 = 0;
-      else if (cosOmega0 <= -1) omega0 = 180;
-      else omega0 = Math.acos(cosOmega0) * (180 / Math.PI);
-      
-      let solarSunrise = 12 - (omega0 / 15);
-      
-      const meanLong = (280.460 + 0.9856474 * d) % 360;
-      const radMeanLong = meanLong * Math.PI / 180;
-      const eot = (-104.9 * Math.sin(radMeanLong) + 596.2 * Math.sin(2 * radMeanLong) + 4.3 * Math.sin(3 * radMeanLong) - 12.7 * Math.sin(4 * radMeanLong) - 429.3 * Math.cos(radMeanLong) - 2.0 * Math.cos(2 * radMeanLong)) / 3600;
-      
-      const stdMeridian = 82.5;
-      const longCorrection = (stdMeridian - lon) / 15;
-      
-      return solarSunrise - eot + longCorrection;
-    }
-
     function getMoonPhasePath(phaseAngle) {
       const r = 12;
       const cx = 400;
@@ -684,8 +655,9 @@
         ascLabel.setAttribute("transform", `rotate(${rot}, ${textPos.x}, ${textPos.y})`);
       }
 
-      const sunriseHour = getSunriseHour(jd, observerLat, observerLon);
-      const ringRotation = sunSid - (sunriseHour * 15);
+      // FIX: Align the time ring rotation so that current civil time aligns with the ASC arrow position
+      const timeFraction = date.getHours() + (date.getMinutes() / 60) + (date.getSeconds() / 3600);
+      const ringRotation = ascSid - (timeFraction * 15);
 
       if (lastRingRotation === null || Math.abs(ringRotation - lastRingRotation) > 0.5) {
         for (let i = 0; i < 24; i++) {
@@ -711,8 +683,7 @@
       
       updateDisplayValues(date);
 
-      const localAscAngle = ((ascSid - ringRotation) % 360 + 360) % 360;
-      const currentAscHourIndex = Math.floor(localAscAngle / 15) % 24;
+      const currentAscHourIndex = date.getHours();
 
       const currentMonthIndex = date.getMonth();
       const currentZodiacIndex = Math.floor(sunSid / 30) % 12;
