@@ -35,27 +35,33 @@
       justify-content: center;
     }
 
-    /* Top Left HUD */
+    /* Top Left HUD (Fully Responsive) */
     .hud {
       position: absolute;
       top: 15px;
       left: 15px;
       z-index: 10;
-      background: rgba(11, 13, 23, 0.5);
+      background: rgba(11, 13, 23, 0.65);
       padding: 12px 18px;
       border-radius: 12px;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
+      max-width: calc(100vw - 30px);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      transition: all 0.3s ease;
     }
 
-    /* Interactive Date Time Scroller */
+    /* Dynamic Date Time Scroller */
     .dt-grid {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 1px;
+      width: 100%;
     }
 
     .dt-col {
@@ -70,28 +76,32 @@
       border: none;
       color: var(--text-muted);
       cursor: pointer;
-      font-size: 1.1rem;
-      padding: 0;
+      font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+      padding: 2px 4px;
       line-height: 1;
-      transition: color 0.2s;
+      transition: color 0.2s, transform 0.1s;
     }
 
     .dt-col button:hover {
       color: var(--accent-silver);
     }
 
+    .dt-col button:active {
+      transform: scale(1.2);
+    }
+
     .dt-val {
       font-family: monospace;
-      font-size: 1.6rem;
+      font-size: clamp(1.1rem, 3.2vw, 1.6rem);
       font-weight: 700;
       color: #fff;
-      margin: 2px 0;
+      margin: 1px 0;
       font-variant-numeric: tabular-nums;
     }
 
     .dt-sep {
       font-family: monospace;
-      font-size: 1.2rem;
+      font-size: clamp(0.9rem, 2.5vw, 1.2rem);
       color: var(--text-muted);
     }
 
@@ -100,8 +110,9 @@
       border: none;
       color: var(--text-main);
       cursor: pointer;
-      font-size: 1.2rem;
-      margin-left: 8px;
+      font-size: clamp(1rem, 2.8vw, 1.2rem);
+      margin-left: 4px;
+      padding: 4px;
       transition: transform 0.3s, color 0.2s;
       display: flex;
       align-items: center;
@@ -116,9 +127,11 @@
     /* Sub-texts Readout */
     .sub-texts {
       display: flex;
-      gap: 10px;
-      font-family: Roboto;
-      font-size: 0.85rem;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 6px 10px;
+      font-family: Roboto, -apple-system, sans-serif;
+      font-size: clamp(0.7rem, 2vw, 0.85rem);
       font-weight: 600;
       letter-spacing: 0.5px;
     }
@@ -126,7 +139,26 @@
     .sub-texts span {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
+      white-space: nowrap;
+    }
+
+    /* Mobile Breakpoint Optimizations */
+    @media (max-width: 600px) {
+      .hud {
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100vw - 20px);
+        max-width: 420px;
+        padding: 8px 12px;
+        gap: 6px;
+      }
+
+      .sub-texts {
+        justify-content: center;
+        gap: 4px 12px;
+      }
     }
 
     /* Clock Wrapper (Full Viewport Fit) */
@@ -160,12 +192,13 @@
     .glow-asc { filter: drop-shadow(0px 0px 6px #ff4757); }
     
     .ml-text { font-family: "Malayalam MN", "Kartika", sans-serif; transition: all 0.2s ease;}
-    path, line, text { transition: all 0.2s ease; }
+    path, line { transition: all 0.2s ease; }
+    text { transition: fill 0.2s ease, opacity 0.2s ease; }
   </style>
 </head>
 <body>
 
-  <!-- Top Left UI -->
+  <!-- Top Left UI HUD -->
   <div class="hud">
     <div class="dt-grid">
       <div class="dt-col" data-unit="year">
@@ -185,7 +218,7 @@
         <span class="dt-val" id="val-day">14</span>
         <button class="btn-minus">-</button>
       </div>
-      <span class="dt-sep">&nbsp;&nbsp;</span>
+      <span class="dt-sep">&nbsp;</span>
       <div class="dt-col" data-unit="hour">
         <button class="btn-plus">+</button>
         <span class="dt-val" id="val-hour">09</span>
@@ -296,6 +329,7 @@
     let customTime = new Date();
     let isRealtime = true;
     let lastRingRotation = null;
+    let lastMonthRenderYear = null;
 
     function getJulianDate(date) {
       return (date.getTime() / 86400000) + 2440587.5;
@@ -429,9 +463,6 @@
       const tickGroup = document.getElementById("degree-ticks");
       const cx = 400, cy = 400;
 
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-
       for (let i = 0; i < 24; i++) {
         const startDeg = i * 15;
         const endDeg = (i + 1) * 15;
@@ -487,29 +518,18 @@
         timeGroup.appendChild(text);
       }
 
+      // Initial creation of Month Ring DOM structure
       for (let i = 0; i < 12; i++) {
-        let startDeg = getSunSiderealAtDate(currentYear, i, 1);
-        let endDeg = getSunSiderealAtDate(currentYear, (i + 1) % 12, 1);
-        if (endDeg < startDeg) endDeg += 360;
-
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("id", `greg-month-path-${i}`);
-        path.setAttribute("d", describeArc(cx, cy, 350, 390, startDeg, endDeg));
         monthGroup.appendChild(path);
 
-        const midDeg = (startDeg + endDeg) / 2;
-        const labelPos = polarToCartesian(cx, cy, 370, midDeg);
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("id", `greg-month-text-${i}`);
-        text.setAttribute("x", labelPos.x);
-        text.setAttribute("y", labelPos.y); 
         text.setAttribute("dominant-baseline", "middle");
         text.setAttribute("text-anchor", "middle");
         text.setAttribute("font-size", "13");
         text.setAttribute("letter-spacing", "1");
-        
-        const rot = midDeg > 90 && midDeg < 270 ? midDeg + 180 : midDeg;
-        text.setAttribute("transform", `rotate(${rot}, ${labelPos.x}, ${labelPos.y})`);
         text.textContent = MONTH_NAMES[i];
         monthGroup.appendChild(text);
       }
@@ -655,16 +675,25 @@
         ascLabel.setAttribute("transform", `rotate(${rot}, ${textPos.x}, ${textPos.y})`);
       }
 
-      // FIX: Align the time ring rotation so that current civil time aligns with the ASC arrow position
+      // Align time ring rotation to ASC position
       const timeFraction = date.getHours() + (date.getMinutes() / 60) + (date.getSeconds() / 3600);
-      const ringRotation = ascSid - (timeFraction * 15);
+      
+      let ringRotation = (ascSid - (timeFraction * 15)) % 360;
+      if (ringRotation < 0) ringRotation += 360;
 
-      if (lastRingRotation === null || Math.abs(ringRotation - lastRingRotation) > 0.5) {
+      let rotDiff = 0;
+      if (lastRingRotation !== null) {
+        rotDiff = Math.abs(ringRotation - lastRingRotation);
+        if (rotDiff > 180) rotDiff = 360 - rotDiff; 
+      }
+
+      if (lastRingRotation === null || rotDiff > 0.5) {
         for (let i = 0; i < 24; i++) {
           const startDeg = i * 15;
           const midDeg = startDeg + 7.5;
           const globalPosAngle = (midDeg + ringRotation) % 360;
           const rot = (globalPosAngle > 90 && globalPosAngle < 270) ? midDeg + 180 : midDeg;
+          
           const tText = document.getElementById(`time-text-${i}`);
           if (tText) {
             const textPos = polarToCartesian(400, 400, 421.5, midDeg);
@@ -684,10 +713,33 @@
       updateDisplayValues(date);
 
       const currentAscHourIndex = date.getHours();
-
       const currentMonthIndex = date.getMonth();
       const currentZodiacIndex = Math.floor(sunSid / 30) % 12;
       const currentNakshatraIndex = Math.floor(moonSid / (360 / 27)) % 27;
+
+      // Dynamic recalculation of Gregorian Month Arc Geometry corresponding to Year Ayanamsa
+      const renderYear = date.getFullYear();
+      if (lastMonthRenderYear !== renderYear) {
+        for (let i = 0; i < 12; i++) {
+          let startDeg = getSunSiderealAtDate(renderYear, i, 1);
+          let endDeg = getSunSiderealAtDate(renderYear, (i + 1) % 12, 1);
+          if (endDeg < startDeg) endDeg += 360;
+
+          const gPath = document.getElementById(`greg-month-path-${i}`);
+          const gText = document.getElementById(`greg-month-text-${i}`);
+
+          if (gPath && gText) {
+            gPath.setAttribute("d", describeArc(400, 400, 350, 390, startDeg, endDeg));
+            const midDeg = (startDeg + endDeg) / 2;
+            const labelPos = polarToCartesian(400, 400, 370, midDeg);
+            gText.setAttribute("x", labelPos.x);
+            gText.setAttribute("y", labelPos.y); 
+            const rot = midDeg > 90 && midDeg < 270 ? midDeg + 180 : midDeg;
+            gText.setAttribute("transform", `rotate(${rot}, ${labelPos.x}, ${labelPos.y})`);
+          }
+        }
+        lastMonthRenderYear = renderYear;
+      }
 
       for (let i = 0; i < 24; i++) {
         const isCurrentAsc = (i === currentAscHourIndex);
