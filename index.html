@@ -3,17 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sidereal Zodiac Analog Astroclock (Interactive Kerala Edition)</title>
+  <title>Sidereal Zodiac Analog Astroclock</title>
   <style>
     :root {
       --bg-color: #0b0d17;
-      --card-bg: rgba(20, 24, 45, 0.75);
       --accent-gold: #f3ba2f;
       --accent-silver: #00f0ff;
       --accent-coral: #ff4757;
       --text-main: #e2e8f0;
       --text-muted: #94a3b8;
-      --border-color: rgba(255, 255, 255, 0.1);
     }
 
     * {
@@ -31,63 +29,111 @@
         radial-gradient(circle at 50% 20%, rgba(30, 40, 85, 0.5) 0%, transparent 60%),
         radial-gradient(circle at 80% 80%, rgba(20, 15, 40, 0.5) 0%, transparent 50%);
       color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Malayalam MN", "Kartika", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .app-wrapper {
-      width: 100%;
-      height: 100%;
+    /* Top Left HUD */
+    .hud {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 10;
+      background: rgba(11, 13, 23, 0.5);
+      padding: 12px 18px;
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
       flex-direction: column;
-      padding: 1vh 1vw;
-      justify-content: space-between;
+      gap: 10px;
     }
 
-    header {
-      text-align: center;
-      flex-shrink: 0;
+    /* Interactive Date Time Scroller */
+    .dt-grid {
+      display: flex;
+      align-items: center;
+      gap: 1px;
     }
 
-    header h1 {
-      font-size: 1.5rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #fff;
-      text-shadow: 0 0 15px rgba(243, 186, 47, 0.3);
-    }
-
-    header p {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .main-container {
+    .dt-col {
       display: flex;
       flex-direction: column;
       align-items: center;
+      user-select: none;
+    }
+
+    .dt-col button {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .dt-col button:hover {
+      color: var(--accent-silver);
+    }
+
+    .dt-val {
+      font-family: monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      margin: 2px 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .dt-sep {
+      font-family: monospace;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+    }
+
+    .btn-reset {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-left: 8px;
+      transition: transform 0.3s, color 0.2s;
+      display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 20px;
-      width: 100%;
-      flex: 1;
-      min-height: 0;
     }
 
-    @media (min-width: 900px) {
-      .main-container {
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-      }
+    .btn-reset:hover {
+      transform: rotate(-90deg);
+      color: var(--accent-gold);
     }
 
-    /* SVG Clock Styling */
+    /* Sub-texts Readout */
+    .sub-texts {
+      display: flex;
+      gap: 10px;
+      font-family: Roboto;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .sub-texts span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Clock Wrapper (Full Viewport Fit) */
     .clock-wrapper {
       position: relative;
-      height: 100%;
-      max-height: 75vh;
-      aspect-ratio: 1 / 1;
-      filter: drop-shadow(0 15px 35px rgba(0,0,0,0.6));
+      width: 100vmin;
+      height: 100vmin;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -96,144 +142,10 @@
     svg {
       width: 100%;
       height: 100%;
+      display: block;
       overflow: visible;
-    }
-
-    /* Panels & Readouts */
-    .dashboard {
-      width: 100%;
-      max-width: 440px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(12px);
-      border-radius: 14px;
-      padding: 14px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    }
-
-    .card h2 {
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 4px;
-    }
-
-    .readout-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-    }
-
-    .readout-item {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .readout-item .label {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-
-    .readout-item .value {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-top: 2px;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.5px;
-    }
-
-    .val-sun { color: var(--accent-gold); }
-    .val-moon { color: var(--accent-silver); }
-    .val-asc { color: var(--accent-coral); }
-
-    .location-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .location-controls input {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 5px 8px;
-      border-radius: 6px;
-      width: 80px;
-      font-size: 0.8rem;
-    }
-
-    .btn {
-      background: linear-gradient(135deg, #2b32b2, #1488cc);
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 0.8rem;
-      transition: all 0.2s ease;
-    }
-
-    .btn:hover {
-      opacity: 0.9;
-      transform: translateY(-1px);
-    }
-
-    /* Interactive DateTime Scroller Display */
-    .datetime-scroller-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 5px;
-      text-align: center;
-    }
-
-    .dt-box {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 6px 2px;
-      cursor: ns-resize;
-      user-select: none;
-      transition: border-color 0.2s;
-    }
-
-    .dt-box:hover {
-      border-color: var(--accent-silver);
-    }
-
-    .dt-box .dt-label {
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      display: block;
-    }
-
-    .dt-box .dt-val {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #fff;
-      display: block;
-      margin-top: 2px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .control-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 8px;
+      filter: drop-shadow(0 15px 35px rgba(0,0,0,0.6));
+      transition: all 0.3s ease;
     }
 
     /* Elements Zodiac Ring Colors */
@@ -247,144 +159,108 @@
     .glow-moon { filter: drop-shadow(0px 0px 6px #00f0ff); }
     .glow-asc { filter: drop-shadow(0px 0px 6px #ff4757); }
     
-    /* Typography Overrides */
-    .ml-text { font-family: "Malayalam MN", "Kartika", sans-serif; }
+    .ml-text { font-family: "Malayalam MN", "Kartika", sans-serif; transition: all 0.2s ease;}
+    path, line, text { transition: all 0.2s ease; }
   </style>
 </head>
 <body>
 
-  <div class="app-wrapper">
-    <header>
-      <h1>Sidereal Astroclock</h1>
-      <p>Real-Time Lahiri Zodiac • Kerala Edition</p>
-    </header>
-
-    <div class="main-container">
-      
-      <!-- SVG Circular Astroclock -->
-      <div class="clock-wrapper">
-        <svg id="astroclock" viewBox="0 0 800 800">
-          <defs>
-            <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#181c38" />
-              <stop offset="100%" stop-color="#0b0d17" />
-            </radialGradient>
-          </defs>
-
-          <!-- Outer Background Circle -->
-          <circle cx="400" cy="400" r="395" fill="url(#centerGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
-
-          <!-- Rings Generated via JS -->
-          <g id="month-ring"></g>
-          <g id="zodiac-ring"></g>
-          <g id="nakshatra-ring"></g>
-          <g id="degree-ticks" stroke="rgba(255,255,255,0.2)" stroke-width="1"></g>
-
-          <!-- Inner Wheel Divider -->
-          <circle cx="400" cy="400" r="230" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" />
-          <circle cx="400" cy="400" r="160" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
-
-          <!-- Center Hub -->
-          <circle cx="400" cy="400" r="8" fill="#e2e8f0" />
-
-          <!-- Dynamic Celestial Hands -->
-          <g id="hand-asc" class="glow-asc">
-            <line x1="400" y1="400" x2="400" y2="40" stroke="#ff4757" stroke-width="2.5" stroke-dasharray="6,4" />
-            <polygon points="400,25 393,42 407,42" fill="#ff4757" />
-            <text x="400" y="15" fill="#ff4757" font-size="14" font-weight="bold" text-anchor="middle">ASC</text>
-          </g>
-
-          <g id="hand-sun" class="glow-sun">
-            <line x1="400" y1="400" x2="400" y2="100" stroke="#f3ba2f" stroke-width="3" />
-            <circle cx="400" cy="90" r="14" fill="#f3ba2f" />
-            <circle cx="400" cy="90" r="6" fill="#0b0d17" />
-          </g>
-
-          <g id="hand-moon" class="glow-moon">
-            <line x1="400" y1="400" x2="400" y2="130" stroke="#00f0ff" stroke-width="2.5" />
-            <path d="M 393,115 A 12,12 0 1,0 407,130 A 9,9 0 1,1 393,115 Z" fill="#00f0ff" />
-          </g>
-
-        </svg>
+  <!-- Top Left UI -->
+  <div class="hud">
+    <div class="dt-grid">
+      <div class="dt-col" data-unit="year">
+        <button class="btn-plus">+</button>
+        <span class="dt-val" id="val-year">2026</span>
+        <button class="btn-minus">-</button>
       </div>
-
-      <!-- Right Side Dashboard -->
-      <div class="dashboard">
-        
-        <!-- Real-Time Positions -->
-        <div class="card">
-          <h2>Live Positions (Sidereal)</h2>
-          <div class="readout-grid">
-            <div class="readout-item">
-              <span class="label">Sun ☉</span>
-              <span class="value val-sun" id="sun-pos">--</span>
-              <span class="label" id="sun-nak" class="ml-text">--</span>
-            </div>
-            <div class="readout-item">
-              <span class="label">Moon ☽</span>
-              <span class="value val-moon" id="moon-pos">--</span>
-              <span class="label" id="moon-nak" class="ml-text">--</span>
-            </div>
-            <div class="readout-item">
-              <span class="label">Ascendant (ASC)</span>
-              <span class="value val-asc" id="asc-pos">--</span>
-              <span class="label" id="asc-nak" class="ml-text">--</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Interactive Date & Time Scroller / Controls -->
-        <div class="card">
-          <h2>Interactive Date & Time</h2>
-          <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 6px;">Scroll up/down on any box to adjust values & animate celestial hands:</p>
-          
-          <div class="datetime-scroller-grid">
-            <div class="dt-box" data-unit="year">
-              <span class="dt-label">Year</span>
-              <span class="dt-val" id="val-year">2026</span>
-            </div>
-            <div class="dt-box" data-unit="month">
-              <span class="dt-label">Month</span>
-              <span class="dt-val" id="val-month">08</span>
-            </div>
-            <div class="dt-box" data-unit="day">
-              <span class="dt-label">Day</span>
-              <span class="dt-val" id="val-day">13</span>
-            </div>
-            <div class="dt-box" data-unit="hour">
-              <span class="dt-label">Hour</span>
-              <span class="dt-val" id="val-hour">10</span>
-            </div>
-            <div class="dt-box" data-unit="minute">
-              <span class="dt-label">Minute</span>
-              <span class="dt-val" id="val-minute">35</span>
-            </div>
-            <div class="dt-box" data-unit="second">
-              <span class="dt-label">Second</span>
-              <span class="dt-val" id="val-second">07</span>
-            </div>
-          </div>
-
-          <div class="control-actions">
-            <button class="btn" id="btn-live">Resume Real-Time</button>
-            <span class="label" id="ayanamsha-val" style="font-size: 0.75rem;">--</span>
-          </div>
-        </div>
-
-        <!-- Location & Settings -->
-        <div class="card">
-          <h2>Observer Controls</h2>
-          <div class="location-controls">
-            <label class="label">Lat:</label>
-            <input type="number" id="lat" value="11.25" step="0.01" />
-            <label class="label">Lon:</label>
-            <input type="number" id="lon" value="75.78" step="0.01" />
-            <button class="btn" id="btn-geolocate">Detect Location</button>
-          </div>
-        </div>
-
+      <span class="dt-sep">/</span>
+      <div class="dt-col" data-unit="month">
+        <button class="btn-plus">+</button>
+        <span class="dt-val" id="val-month">08</span>
+        <button class="btn-minus">-</button>
       </div>
+      <span class="dt-sep">/</span>
+      <div class="dt-col" data-unit="day">
+        <button class="btn-plus">+</button>
+        <span class="dt-val" id="val-day">14</span>
+        <button class="btn-minus">-</button>
+      </div>
+      <span class="dt-sep">&nbsp;&nbsp;</span>
+      <div class="dt-col" data-unit="hour">
+        <button class="btn-plus">+</button>
+        <span class="dt-val" id="val-hour">09</span>
+        <button class="btn-minus">-</button>
+      </div>
+      <span class="dt-sep">:</span>
+      <div class="dt-col" data-unit="minute">
+        <button class="btn-plus">+</button>
+        <span class="dt-val" id="val-minute">14</span>
+        <button class="btn-minus">-</button>
+      </div>
+      <span class="dt-sep">:</span>
+      <div class="dt-col" data-unit="second">
+        <button class="btn-plus">+</button>
+        <span class="dt-val" id="val-second">22</span>
+        <button class="btn-minus">-</button>
+      </div>
+      <button class="btn-reset" id="btn-live" title="Reset to Now">↺</button>
     </div>
+
+    <!-- Live Positions & Ayanamsa Subtexts -->
+    <div class="sub-texts">
+      <span style="color: var(--accent-gold);">☉<span id="sun-pos">--</span></span>
+      <span style="color: var(--accent-silver);">☽<span id="moon-pos">--</span></span>
+      <span style="color: var(--accent-coral);">ASC<span id="asc-pos">--</span></span>
+      <span style="color: var(--text-muted);">Aya:<span id="ayanamsha-val">--</span></span>
+    </div>
+  </div>
+
+  <!-- SVG Circular Astroclock -->
+  <div class="clock-wrapper">
+    <svg id="astroclock" viewBox="-80 -80 960 960" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#181c38" />
+          <stop offset="100%" stop-color="#0b0d17" />
+        </radialGradient>
+      </defs>
+
+      <!-- Outer Background Circle -->
+      <circle cx="400" cy="400" r="455" fill="url(#centerGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="2" />
+
+      <!-- Rings Generated via JS -->
+      <g id="time-ring"></g>
+      <g id="month-ring"></g>
+      <g id="zodiac-ring"></g>
+      <g id="nakshatra-ring"></g>
+      <g id="degree-ticks" stroke="rgba(255,255,255,0.2)" stroke-width="1"></g>
+
+      <!-- Inner Wheel Divider -->
+      <circle cx="400" cy="400" r="230" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5" />
+      <circle cx="400" cy="400" r="160" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
+
+      <!-- Center Hub -->
+      <circle cx="400" cy="400" r="8" fill="#e2e8f0" />
+
+      <!-- Dynamic Celestial Hands -->
+      <g id="hand-asc" class="glow-asc">
+        <line x1="400" y1="400" x2="400" y2="12" stroke="#ff4757" stroke-width="2.5" stroke-dasharray="6,4" />
+        <polygon points="400,-5 393,12 407,12" fill="#ff4757" />
+      </g>
+      <text id="asc-time-label" class="glow-asc" fill="#ff4757" font-size="16" font-weight="bold" text-anchor="middle" dominant-baseline="middle">--:--:--</text>
+
+      <g id="hand-sun" class="glow-sun">
+        <line x1="400" y1="400" x2="400" y2="100" stroke="#f3ba2f" stroke-width="3" />
+        <circle cx="400" cy="90" r="14" fill="#f3ba2f" />
+        <circle cx="400" cy="90" r="6" fill="#0b0d17" />
+      </g>
+
+      <g id="hand-moon" class="glow-moon">
+        <line x1="400" y1="400" x2="400" y2="130" stroke="#00f0ff" stroke-width="2.5" />
+        <circle cx="400" cy="115" r="12" fill="#0b0d17" stroke="#00f0ff" stroke-width="1.5" />
+        <path id="moon-phase-path" fill="#00f0ff" />
+      </g>
+    </svg>
   </div>
 
   <script>
@@ -411,20 +287,15 @@
       "പൂരുരുട്ടാതി", "ഉത്തൃട്ടാതി", "രേവതി"
     ];
 
-    const NAKSHATRAS = [
-      "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra",
-      "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni",
-      "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
-      "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha",
-      "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
-    ];
-
     const MONTH_NAMES = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
-    let observerLat = 11.25;
-    let observerLon = 75.78;
+    // Fixed Context Location (Kozhikode, Kerala)
+    const observerLat = 11.25;
+    const observerLon = 75.78;
+    
     let customTime = new Date();
     let isRealtime = true;
+    let lastRingRotation = null;
 
     function getJulianDate(date) {
       return (date.getTime() / 86400000) + 2440587.5;
@@ -485,22 +356,75 @@
       return (getSunTropicalPosition(jd) - ayanamsha + 360) % 360;
     }
 
+    function getSunriseHour(jd, lat, lon) {
+      const d = jd - 2451545.0;
+      const sunTrop = getSunTropicalPosition(jd);
+      const eps = (23.439291 - 0.0000004 * d) * Math.PI / 180;
+      const radSun = sunTrop * Math.PI / 180;
+      
+      const sinDelta = Math.sin(eps) * Math.sin(radSun);
+      const delta = Math.asin(sinDelta);
+      
+      const radLat = lat * Math.PI / 180;
+      const cosOmega0 = -Math.tan(radLat) * Math.tan(delta);
+      
+      let omega0 = 90;
+      if (cosOmega0 >= 1) omega0 = 0;
+      else if (cosOmega0 <= -1) omega0 = 180;
+      else omega0 = Math.acos(cosOmega0) * (180 / Math.PI);
+      
+      let solarSunrise = 12 - (omega0 / 15);
+      
+      const meanLong = (280.460 + 0.9856474 * d) % 360;
+      const radMeanLong = meanLong * Math.PI / 180;
+      const eot = (-104.9 * Math.sin(radMeanLong) + 596.2 * Math.sin(2 * radMeanLong) + 4.3 * Math.sin(3 * radMeanLong) - 12.7 * Math.sin(4 * radMeanLong) - 429.3 * Math.cos(radMeanLong) - 2.0 * Math.cos(2 * radMeanLong)) / 3600;
+      
+      const stdMeridian = 82.5;
+      const longCorrection = (stdMeridian - lon) / 15;
+      
+      return solarSunrise - eot + longCorrection;
+    }
+
+    function getMoonPhasePath(phaseAngle) {
+      const r = 12;
+      const cx = 400;
+      const cy = 115;
+
+      const rad = phaseAngle * Math.PI / 180;
+      const cosA = Math.cos(rad);
+      const rx = Math.abs(r * cosA);
+      
+      const waxing = phaseAngle <= 180;
+
+      if (Math.abs(phaseAngle - 0) < 0.1 || Math.abs(phaseAngle - 360) < 0.1) {
+        return ""; // New moon
+      }
+      if (Math.abs(phaseAngle - 180) < 0.1) {
+        return `M ${cx - r} ${cy} A ${r} ${r} 0 1 0 ${cx + r} ${cy} A ${r} ${r} 0 1 0 ${cx - r} ${cy}`; // Full moon
+      }
+
+      let d = `M ${cx} ${cy - r} `;
+      if (waxing) {
+        d += `A ${r} ${r} 0 0 1 ${cx} ${cy + r} `;
+        const sweep = phaseAngle < 90 ? 0 : 1;
+        d += `A ${rx} ${r} 0 0 ${sweep} ${cx} ${cy - r} Z`;
+      } else {
+        d += `A ${r} ${r} 0 0 0 ${cx} ${cy + r} `;
+        const sweep = phaseAngle < 270 ? 0 : 1;
+        d += `A ${rx} ${r} 0 0 ${sweep} ${cx} ${cy - r} Z`;
+      }
+      return d;
+    }
+
     function formatSiderealPos(deg) {
       const signIndex = Math.floor(deg / 30) % 12;
       const remDeg = deg % 30;
       const d = Math.floor(remDeg);
       const m = Math.floor((remDeg - d) * 60);
       const s = Math.round((((remDeg - d) * 60) - m) * 60);
-      const nakshatraIndex = Math.floor(deg / (360 / 27)) % 27;
-
+      
       const pad = (n) => String(n).padStart(2, '0');
-      const padDeg = (n) => String(n).padStart(2, '0');
-
-      return {
-        formatted: `${padDeg(d)}° ${pad(m)}' ${pad(s)}" ${ZODIAC_SIGNS[signIndex].symbol}`,
-        mlMonthName: ZODIAC_SIGNS[signIndex].mlMonth,
-        nakshatra: ML_NAKSHATRAS[nakshatraIndex]
-      };
+      return `${pad(d)}°${pad(m)}'${pad(s)}"${ZODIAC_SIGNS[signIndex].symbol}`;
     }
 
     function polarToCartesian(cx, cy, r, deg) {
@@ -527,6 +451,7 @@
     }
 
     function buildZodiacClockUI() {
+      const timeGroup = document.getElementById("time-ring");
       const monthGroup = document.getElementById("month-ring");
       const ringGroup = document.getElementById("zodiac-ring");
       const nakshatraGroup = document.getElementById("nakshatra-ring");
@@ -534,32 +459,82 @@
       const cx = 400, cy = 400;
 
       const currentDate = new Date();
-      const currentMonthIndex = currentDate.getMonth();
       const currentYear = currentDate.getFullYear();
+
+      for (let i = 0; i < 24; i++) {
+        const startDeg = i * 15;
+        const endDeg = (i + 1) * 15;
+        const midDeg = startDeg + 7.5;
+
+        const bgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        bgPath.setAttribute("id", `time-bg-${i}`);
+        bgPath.setAttribute("d", describeArc(cx, cy, 405, 438, startDeg, endDeg));
+        bgPath.setAttribute("fill", "rgba(255, 71, 87, 0)");
+        timeGroup.appendChild(bgPath);
+
+        const p1 = polarToCartesian(cx, cy, 405, startDeg);
+        const p2 = polarToCartesian(cx, cy, 438, startDeg);
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", p1.x);
+        line.setAttribute("y1", p1.y);
+        line.setAttribute("x2", p2.x);
+        line.setAttribute("y2", p2.y);
+        line.setAttribute("stroke", "rgba(255,255,255,0.25)");
+        line.setAttribute("stroke-width", "1.5");
+        timeGroup.appendChild(line);
+
+        for(let j = 1; j < 12; j++) {
+          const minDeg = startDeg + (j * 1.25);
+          const isQuarter = (j % 3 === 0);
+          const mp1 = polarToCartesian(cx, cy, 405, minDeg);
+          const mp2 = polarToCartesian(cx, cy, isQuarter ? 418 : 412, minDeg);
+          
+          const mLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          mLine.setAttribute("x1", mp1.x);
+          mLine.setAttribute("y1", mp1.y);
+          mLine.setAttribute("x2", mp2.x);
+          mLine.setAttribute("y2", mp2.y);
+          mLine.setAttribute("stroke", isQuarter ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)");
+          mLine.setAttribute("stroke-width", "1");
+          timeGroup.appendChild(mLine);
+        }
+
+        const rot = midDeg > 90 && midDeg < 270 ? midDeg + 180 : midDeg;
+        const textPos = polarToCartesian(cx, cy, 421.5, midDeg);
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("id", `time-text-${i}`);
+        text.setAttribute("x", textPos.x);
+        text.setAttribute("y", textPos.y);
+        text.setAttribute("dominant-baseline", "middle");
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("font-size", "20");
+        text.setAttribute("font-weight", "600");
+        text.setAttribute("letter-spacing", "0.5");
+        text.setAttribute("fill", "#94a3b8");
+        text.setAttribute("transform", `rotate(${rot}, ${textPos.x}, ${textPos.y})`);
+        text.textContent = String(i).padStart(2, '0');
+        timeGroup.appendChild(text);
+      }
 
       for (let i = 0; i < 12; i++) {
         let startDeg = getSunSiderealAtDate(currentYear, i, 1);
         let endDeg = getSunSiderealAtDate(currentYear, (i + 1) % 12, 1);
         if (endDeg < startDeg) endDeg += 360;
 
-        const isCurrentMonth = (i === currentMonthIndex);
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("id", `greg-month-path-${i}`);
         path.setAttribute("d", describeArc(cx, cy, 350, 390, startDeg, endDeg));
-        path.setAttribute("fill", isCurrentMonth ? "rgba(243, 186, 47, 0.2)" : (i % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.06)"));
-        path.setAttribute("stroke", isCurrentMonth ? "#f3ba2f" : "rgba(255,255,255,0.2)");
-        path.setAttribute("stroke-width", isCurrentMonth ? "2" : "1");
         monthGroup.appendChild(path);
 
         const midDeg = (startDeg + endDeg) / 2;
         const labelPos = polarToCartesian(cx, cy, 370, midDeg);
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("id", `greg-month-text-${i}`);
         text.setAttribute("x", labelPos.x);
         text.setAttribute("y", labelPos.y); 
         text.setAttribute("dominant-baseline", "middle");
         text.setAttribute("text-anchor", "middle");
-        text.setAttribute("fill", isCurrentMonth ? "#f3ba2f" : "#a0aec0");
         text.setAttribute("font-size", "13");
-        text.setAttribute("font-weight", isCurrentMonth ? "bold" : "normal");
         text.setAttribute("letter-spacing", "1");
         
         const rot = midDeg > 90 && midDeg < 270 ? midDeg + 180 : midDeg;
@@ -576,19 +551,18 @@
         const rot = midDeg > 90 && midDeg < 270 ? midDeg + 180 : midDeg;
 
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("id", `zod-path-${i}`);
         path.setAttribute("d", describeArc(cx, cy, 290, 350, startDeg, endDeg));
         path.setAttribute("class", `${sign.element}-sign`);
-        path.setAttribute("stroke", "rgba(255,255,255,0.15)");
-        path.setAttribute("stroke-width", "1");
         ringGroup.appendChild(path);
 
         const symPos = polarToCartesian(cx, cy, 310, midDeg);
         const symText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        symText.setAttribute("id", `zod-sym-${i}`);
         symText.setAttribute("x", symPos.x);
         symText.setAttribute("y", symPos.y);
         symText.setAttribute("dominant-baseline", "middle");
         symText.setAttribute("text-anchor", "middle");
-        symText.setAttribute("fill", "#ffffff");
         symText.setAttribute("font-size", "22");
         symText.setAttribute("transform", `rotate(${rot}, ${symPos.x}, ${symPos.y})`);
         symText.textContent = sign.symbol;
@@ -596,11 +570,11 @@
 
         const mlPos = polarToCartesian(cx, cy, 335, midDeg);
         const mlText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        mlText.setAttribute("id", `zod-ml-${i}`);
         mlText.setAttribute("x", mlPos.x);
         mlText.setAttribute("y", mlPos.y);
         mlText.setAttribute("dominant-baseline", "middle");
         mlText.setAttribute("text-anchor", "middle");
-        mlText.setAttribute("fill", "#e2e8f0");
         mlText.setAttribute("font-size", "12");
         mlText.setAttribute("class", "ml-text");
         mlText.setAttribute("transform", `rotate(${rot}, ${mlPos.x}, ${mlPos.y})`);
@@ -610,13 +584,21 @@
 
       for (let i = 0; i < 27; i++) {
         const startDeg = i * (360 / 27);
+        const endDeg = (i + 1) * (360 / 27);
         const midDeg = startDeg + (360 / 54);
         
+        const bgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        bgPath.setAttribute("id", `nak-bg-${i}`);
+        bgPath.setAttribute("d", describeArc(cx, cy, 230, 275, startDeg, endDeg));
+        bgPath.setAttribute("fill", "rgba(0, 240, 255, 0)");
+        nakshatraGroup.appendChild(bgPath);
+
         const isGandanta = (i % 9 === 0);
         const pInner = polarToCartesian(cx, cy, isGandanta ? 220 : 230, startDeg);
         const pOuter = polarToCartesian(cx, cy, 275, startDeg);
 
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("id", `nak-line-${i}`);
         line.setAttribute("x1", pInner.x);
         line.setAttribute("y1", pInner.y);
         line.setAttribute("x2", pOuter.x);
@@ -629,11 +611,11 @@
         const textPos = polarToCartesian(cx, cy, 252, midDeg);
         
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("id", `nak-text-${i}`);
         text.setAttribute("x", textPos.x);
         text.setAttribute("y", textPos.y);
         text.setAttribute("dominant-baseline", "middle");
         text.setAttribute("text-anchor", "middle");
-        text.setAttribute("fill", "#00f0ff");
         text.setAttribute("font-size", "10");
         text.setAttribute("font-weight", "500");
         text.setAttribute("class", "ml-text");
@@ -680,23 +662,108 @@
       const moonSid = (moonTrop - ayanamsha + 360) % 360;
       const ascSid = (ascTrop - ayanamsha + 360) % 360;
 
+      const phaseAngle = (moonTrop - sunTrop + 360) % 360;
+      const moonPathElem = document.getElementById("moon-phase-path");
+      if (moonPathElem) {
+        moonPathElem.setAttribute("d", getMoonPhasePath(phaseAngle));
+      }
+
       document.getElementById("hand-sun").setAttribute("transform", `rotate(${sunSid}, 400, 400)`);
       document.getElementById("hand-moon").setAttribute("transform", `rotate(${moonSid}, 400, 400)`);
       document.getElementById("hand-asc").setAttribute("transform", `rotate(${ascSid}, 400, 400)`);
 
-      const sunInfo = formatSiderealPos(sunSid);
-      const moonInfo = formatSiderealPos(moonSid);
-      const ascInfo = formatSiderealPos(ascSid);
+      const pad = (n) => String(n).padStart(2, '0');
+      const timeStr = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      const ascLabel = document.getElementById("asc-time-label");
+      if (ascLabel) {
+        ascLabel.textContent = timeStr;
+        const textPos = polarToCartesian(400, 400, 460, ascSid);
+        ascLabel.setAttribute("x", textPos.x);
+        ascLabel.setAttribute("y", textPos.y);
+        const rot = ascSid > 90 && ascSid < 270 ? ascSid + 180 : ascSid;
+        ascLabel.setAttribute("transform", `rotate(${rot}, ${textPos.x}, ${textPos.y})`);
+      }
 
-      document.getElementById("sun-pos").textContent = sunInfo.formatted;
-      document.getElementById("sun-nak").textContent = `${sunInfo.nakshatra}`;
-      document.getElementById("moon-pos").textContent = moonInfo.formatted;
-      document.getElementById("moon-nak").textContent = `${moonInfo.nakshatra}`;
-      document.getElementById("asc-pos").textContent = ascInfo.formatted;
-      document.getElementById("asc-nak").textContent = `${ascInfo.nakshatra}`;
+      const sunriseHour = getSunriseHour(jd, observerLat, observerLon);
+      const ringRotation = sunSid - (sunriseHour * 15);
 
-      document.getElementById("ayanamsha-val").textContent = `Ayanamsha: ${ayanamsha.toFixed(4)}°`;
+      if (lastRingRotation === null || Math.abs(ringRotation - lastRingRotation) > 0.5) {
+        for (let i = 0; i < 24; i++) {
+          const startDeg = i * 15;
+          const midDeg = startDeg + 7.5;
+          const globalPosAngle = (midDeg + ringRotation) % 360;
+          const rot = (globalPosAngle > 90 && globalPosAngle < 270) ? midDeg + 180 : midDeg;
+          const tText = document.getElementById(`time-text-${i}`);
+          if (tText) {
+            const textPos = polarToCartesian(400, 400, 421.5, midDeg);
+            tText.setAttribute("transform", `rotate(${rot}, ${textPos.x}, ${textPos.y})`);
+          }
+        }
+        lastRingRotation = ringRotation;
+      }
+
+      document.getElementById("time-ring").setAttribute("transform", `rotate(${ringRotation}, 400, 400)`);
+
+      document.getElementById("sun-pos").textContent = formatSiderealPos(sunSid);
+      document.getElementById("moon-pos").textContent = formatSiderealPos(moonSid);
+      document.getElementById("asc-pos").textContent = formatSiderealPos(ascSid);
+      document.getElementById("ayanamsha-val").textContent = `${ayanamsha.toFixed(2)}°`;
+      
       updateDisplayValues(date);
+
+      const localAscAngle = ((ascSid - ringRotation) % 360 + 360) % 360;
+      const currentAscHourIndex = Math.floor(localAscAngle / 15) % 24;
+
+      const currentMonthIndex = date.getMonth();
+      const currentZodiacIndex = Math.floor(sunSid / 30) % 12;
+      const currentNakshatraIndex = Math.floor(moonSid / (360 / 27)) % 27;
+
+      for (let i = 0; i < 24; i++) {
+        const isCurrentAsc = (i === currentAscHourIndex);
+        const tBg = document.getElementById(`time-bg-${i}`);
+        tBg.setAttribute("fill", isCurrentAsc ? "rgba(255, 71, 87, 0.15)" : "rgba(0, 0, 0, 0)");
+        tBg.setAttribute("stroke", isCurrentAsc ? "#ff4757" : "none");
+        tBg.setAttribute("stroke-width", isCurrentAsc ? "1" : "0");
+
+        const tText = document.getElementById(`time-text-${i}`);
+        tText.setAttribute("fill", isCurrentAsc ? "#ff4757" : "#94a3b8");
+        tText.setAttribute("font-weight", isCurrentAsc ? "bold" : "600");
+      }
+
+      for (let i = 0; i < 12; i++) {
+        const isCurrentMonth = (i === currentMonthIndex);
+        const gPath = document.getElementById(`greg-month-path-${i}`);
+        gPath.setAttribute("fill", isCurrentMonth ? "rgba(243, 186, 47, 0.2)" : (i % 2 === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.06)"));
+        gPath.setAttribute("stroke", isCurrentMonth ? "#f3ba2f" : "rgba(255,255,255,0.2)");
+        gPath.setAttribute("stroke-width", isCurrentMonth ? "2" : "1");
+
+        const gText = document.getElementById(`greg-month-text-${i}`);
+        gText.setAttribute("fill", isCurrentMonth ? "#f3ba2f" : "#a0aec0");
+        gText.setAttribute("font-weight", isCurrentMonth ? "bold" : "normal");
+
+        const isCurrentZod = (i === currentZodiacIndex);
+        const zPath = document.getElementById(`zod-path-${i}`);
+        zPath.setAttribute("stroke", isCurrentZod ? "#f3ba2f" : "rgba(255,255,255,0.15)");
+        zPath.setAttribute("stroke-width", isCurrentZod ? "2" : "1");
+
+        const zMlText = document.getElementById(`zod-ml-${i}`);
+        zMlText.setAttribute("fill", isCurrentZod ? "#f3ba2f" : "#e2e8f0");
+        zMlText.setAttribute("font-weight", isCurrentZod ? "bold" : "normal");
+
+        const zSymText = document.getElementById(`zod-sym-${i}`);
+        zSymText.setAttribute("fill", isCurrentZod ? "#f3ba2f" : "#ffffff");
+      }
+
+      for (let i = 0; i < 27; i++) {
+        const isCurrentNak = (i === currentNakshatraIndex);
+        const nBg = document.getElementById(`nak-bg-${i}`);
+        nBg.setAttribute("fill", isCurrentNak ? "rgba(0, 240, 255, 0.2)" : "rgba(0, 240, 255, 0)");
+        nBg.setAttribute("stroke", isCurrentNak ? "#00f0ff" : "none");
+        nBg.setAttribute("stroke-width", isCurrentNak ? "1" : "0");
+
+        const nText = document.getElementById(`nak-text-${i}`);
+        nText.setAttribute("fill", isCurrentNak ? "#ffffff" : "#00f0ff");
+      }
     }
 
     function adjustTimeUnit(unit, delta) {
@@ -731,49 +798,28 @@
         }
       }, 1000);
 
-      document.querySelectorAll(".dt-box").forEach(box => {
-        box.addEventListener("wheel", (e) => {
+      document.querySelectorAll(".dt-col").forEach(col => {
+        const unit = col.getAttribute("data-unit");
+        
+        col.addEventListener("wheel", (e) => {
           e.preventDefault();
-          const unit = box.getAttribute("data-unit");
           const delta = e.deltaY < 0 ? 1 : -1;
           adjustTimeUnit(unit, delta);
         }, { passive: false });
+
+        col.querySelector(".btn-plus").addEventListener("click", () => {
+          adjustTimeUnit(unit, 1);
+        });
+
+        col.querySelector(".btn-minus").addEventListener("click", () => {
+          adjustTimeUnit(unit, -1);
+        });
       });
 
       document.getElementById("btn-live").addEventListener("click", () => {
         isRealtime = true;
         customTime = new Date();
         renderAstroclockAt(customTime);
-      });
-
-      const latInput = document.getElementById("lat");
-      const lonInput = document.getElementById("lon");
-
-      latInput.addEventListener("change", (e) => {
-        observerLat = parseFloat(e.target.value) || 0;
-        renderAstroclockAt(customTime);
-      });
-
-      lonInput.addEventListener("change", (e) => {
-        observerLon = parseFloat(e.target.value) || 0;
-        renderAstroclockAt(customTime);
-      });
-
-      document.getElementById("btn-geolocate").addEventListener("click", () => {
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              observerLat = pos.coords.latitude;
-              observerLon = pos.coords.longitude;
-              latInput.value = observerLat.toFixed(2);
-              lonInput.value = observerLon.toFixed(2);
-              renderAstroclockAt(customTime);
-            },
-            (err) => alert("Unable to retrieve location: " + err.message)
-          );
-        } else {
-          alert("Geolocation is not supported by your browser.");
-        }
       });
     }
 
